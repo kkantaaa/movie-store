@@ -4,7 +4,6 @@ import { format, parseISO } from "date-fns";
 import NavBar from "../components/NavBar";
 import { useGlobalContext } from "../Contexts/GlobalContext";
 
-
 import {
   HoverCard,
   HoverCardContent,
@@ -22,15 +21,15 @@ import {
   DialogTrigger,
 } from "@/lib/utils/ui/dialog";
 import { Input } from "@/lib/utils/ui/input";
+import { CircularProgress, CircularProgressLabel } from "@chakra-ui/react";
 
 function LandingPage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [price, setPrice] = useState();
-  const {cart, setCart} = useGlobalContext();
+  const { cart, setCart } = useGlobalContext();
   const [query, setQuery] = useState("");
-
 
   function formatDate(inputDate) {
     const parsedDate = parseISO(inputDate);
@@ -39,23 +38,22 @@ function LandingPage() {
   }
   function addCart(data) {
     const existingMovie = cart.find((movie) => movie.id === data.id);
-  
+
     if (existingMovie) {
       const updatedCart = cart.map((movie) =>
         movie.id === data.id ? { ...movie, amount: movie.amount + 1 } : movie
       );
       setCart(updatedCart);
-  
+
       const cartJSON = JSON.stringify(updatedCart); // Corrected line
       localStorage.setItem("cart", cartJSON);
     } else {
       setCart([...cart, data]);
-  
+
       const cartJSON = JSON.stringify([...cart, data]); // Store updated cart with the new movie
       localStorage.setItem("cart", cartJSON);
     }
   }
-  
 
   const getData = async () => {
     try {
@@ -80,9 +78,9 @@ function LandingPage() {
   useEffect(() => {
     getData();
     const cartJSON = localStorage.getItem("cart");
-        if (cartJSON) {
-          setCart(JSON.parse(cartJSON));
-        }
+    if (cartJSON) {
+      setCart(JSON.parse(cartJSON));
+    }
     console.log(movies);
     console.log({ cart: cart });
   }, [query]);
@@ -97,37 +95,47 @@ function LandingPage() {
       ) : error ? (
         <p>Error occurred: {error.message}</p>
       ) : (
-        <div className="flex flex-col items-center px-[200px] ">
-          <div className="search-box">
-            <form>
+        <div className="flex flex-col items-center px-[250px]  ">
+          <div className="search-box bg-[#0d253f] w-full relative flex flex-col justify-center items-center">
+            <img
+              className="z-1 grayscale brightness-50  contrast-130 saturate-30 bg-radi  object-cover w-[800px] h-[350px] "
+              src="https://image.tmdb.org/t/p/w1280/2X5nnvkWvYRFmTspXY7lsJqDzog.jpg"
+              alt="Through My Window: Across the Sea - backdrop"
+            />
+            <div className="shadow z-2 object-cover w-full h-full absolute bg-gradient-to-r from-[#0d253f] from-25%  via-[#0a69b186] to-[#0d253f] to-75% left-0 top-0"></div>
+            <form className="z-3 absolute mt-[250px] w-full px-[10%]">
               <input
+                className="w-full h-[48px] rounded-full px-[30px] "
                 id="input-text-filter"
                 type="text"
-                placeholder="searching"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search for a movie"
+                    value={query}
+                    onChange={(e)=>{setQuery(e.target.value)}}
               />
+            
             </form>
           </div>
-          <div className="flex flex-wrap justify-center w-full">
+          <div className=" w-full grid gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 my-[20px]">
             {movies.map((movie) => (
               <div
-                className="bg-red-300 w-[200px] h-[400px] m-[10px] px-[14px] py-[16px] flex flex-col items-center justify-between"
+                className="bg-white rounded-[8px] w-[230px] h-[460px] m-[10px] px-[14px] py-[16px] flex flex-col items-center justify-between"
                 key={movie.id}
               >
                 <HoverCard>
                   <HoverCardTrigger>
                     <img
-                      className="h-[250px]"
+                      className="rounded-[8px]"
                       src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
                     />
-                    <h1 className="my-[8px]">{movie.title}</h1>
-                    <h2>{formatDate(movie.release_date)}</h2>
+                    <h1 className="my-[8px] font-medium text-[14px]">{movie.title}</h1>
+                    <h2 className=" font-light text-[14px]">
+                      {formatDate(movie.release_date)}
+                    </h2>
                   </HoverCardTrigger>
-                  <div className="w-full flex flex-row justify-between items-end text-yellow-300">
-                    <div className="flex">
+                  <div className="w-full flex flex-row justify-between items-end text-[#feba3d]">
+                    <div className="flex 0 mb-[5px]">
                       <svg
-                        className="mt-[2px] mx-[4px]"
+                        className="mt-[3px] mx-[5px] "
                         xmlns="http://www.w3.org/2000/svg"
                         width="12"
                         height="12"
@@ -143,48 +151,85 @@ function LandingPage() {
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button
-                          disabled={cart&&
-                            cart.find(
-                              (movieOnCart) =>
-                                movieOnCart && movieOnCart.id === movie.id
-                            ) !== undefined
-                          }
-                          variant="outline"
-                        >
-                          Add to Cart
-                        </Button>
+                        {cart &&
+                        cart.find(
+                          (movieOnCart) =>
+                            movieOnCart && movieOnCart.id === movie.id
+                        ) !== undefined ? (
+                          <Button
+                            disabled
+                            variant="outline"
+                            className="bg-[#feba3d] text-white rounded-full"
+                          >
+                            on Cart
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="bg-[#feba3d] text-white rounded-full"
+                          >
+                            Add to Cart
+                          </Button>
+                        )}
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>Add Price</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Input
-                            id="name"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            className="col-span-3"
+                      <DialogContent className="sm:max-w-[500px]">
+                        <div className="flex flex-col items-center">
+                          <img
+                            className="rounded-[8px] w-[250px]"
+                            src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
                           />
-                          <DialogClose asChild>
-                            <Button
-                              onClick={() => {
-                                addCart({
-                                  ...movie,
-                                  price: price,
-                                  quantity: 1,
-                                });
-                              }}
-                            >
-                              Add
-                            </Button>
-                          </DialogClose>
+                          <h1 className="my-[8px] font-medium">
+                            {movie.title}
+                          </h1>
+                          <div className="flex justify-evenly items-center w-full">
+                            <DialogHeader>
+                              <DialogTitle>Add Price</DialogTitle>
+                            </DialogHeader>{" "}
+                            <Input
+                              id="name"
+                              value={price}
+                              onChange={(e) => setPrice(e.target.value)}
+                              className="w-[70%] rounded-[8px]"
+                            />
+                          </div>
+
+                          <div className="w-full ">
+                            <DialogClose asChild>
+                              <Button
+                                className="bg-[#fc6131e8] text-white rounded-full w-[80px] mt-[10px] ml-[78%] hover:bg-[#fc6031ab]"
+                                onClick={() => {
+                                  addCart({
+                                    ...movie,
+                                    price: price,
+                                    quantity: 1,
+                                  });
+                                }}
+                              >
+                                Add
+                              </Button>
+                            </DialogClose>
+                          </div>
                         </div>
                       </DialogContent>
                     </Dialog>
                   </div>
-                  <HoverCardContent>
-                    <p>{movie.overview}</p>
+                  <HoverCardContent className="bg-[#0a141f] text-white border-none rounded-[10px] w-[500px] h-[100] flex justify-between">
+                    <div>
+                      <CircularProgress
+                        size="50px"
+                        value={movie.vote_average * 10}
+                        color="green.400"
+                      >
+                        <CircularProgressLabel fontSize="10px">
+                          {parseInt(movie.vote_average * 10)} %
+                        </CircularProgressLabel>
+                      </CircularProgress>
+                    </div>
+
+                    <div className="w-[86%]">
+                      <h1 className="font-medium mb-[8px]">Overview</h1>
+                      <p className="font-light text-[14px]">{movie.overview}</p>
+                    </div>
                   </HoverCardContent>
                 </HoverCard>
               </div>

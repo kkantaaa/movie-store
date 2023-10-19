@@ -1,29 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useGlobalContext } from "../Contexts/GlobalContext";
 import QRcode from "../assets/mockup_QRcode.svg";
+import CancelPayment from "../assets/baby.png"
 
 import { useToast } from "@/lib/utils/ui/use-toast";
 import { Button } from "@/lib/utils/ui/button";
 import { Input } from "@/lib/utils/ui/input";
 import {
   Menubar,
-  MenubarCheckboxItem,
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  MenubarRadioGroup,
-  MenubarRadioItem,
   MenubarSeparator,
-  MenubarShortcut,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
   MenubarTrigger,
 } from "@/lib/utils/ui/menubar";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -75,6 +68,7 @@ function OnCart() {
         }
       });
     }, 1000);
+   
 
     return () => {
       clearInterval(timer); // Clear interval in the cleanup function
@@ -82,8 +76,8 @@ function OnCart() {
   }
 
   return (
-    <div className="">
-      <Menubar className=" border-none text-white w-[50px] h-[50px] my-[5px] mx-[300px] flex justify-center items-center">
+    <div className="container">
+      <Menubar className=" border-none text-white w-[50px] h-[50px] my-[5px] mx-[700px] flex justify-center items-center">
         <MenubarMenu>
           <MenubarTrigger>
             <svg
@@ -99,7 +93,7 @@ function OnCart() {
           </MenubarTrigger>
           <MenubarContent className="w-[600px] h-fit bg-white">
             <MenubarItem className="h-[500px] w-full flex flex-col flex-nowrap">
-              <Table>
+              <Table className="w-full">
                 <TableHeader>
                   <TableRow>
                     <TableHead></TableHead>
@@ -113,15 +107,18 @@ function OnCart() {
                   {cart
                     ? cart.map((item, index) => (
                         <TableRow key={index}>
-                          <TableCell className="font-medium">
+                          <TableCell className="w-[100px]  m-0">
                             <img
-                              className="h-[80px]"
+                              className="h-[80px] w-fit "
                               src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
                             />
                           </TableCell>
-                          <TableCell>{item.title}</TableCell>
-                          <TableCell>
+                          <TableCell className={"w-[120px] text-[12px]"}>
+                            {item.title}
+                          </TableCell>
+                          <TableCell className={"w-[140px] text-[12px] "}>
                             <Button
+                              className=" w-[5px]"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (item.quantity >= 1) {
@@ -147,25 +144,31 @@ function OnCart() {
                               +
                             </Button>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className={"w-[120px] text-[12px]"}>
                             <Input
                               id="name"
-                              value={item.price}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
+                              value={Intl.NumberFormat().format(item.price)}
                               onChange={(e) => {
                                 const updatedCart = [...cart];
                                 updatedCart[index].price = e.target.value;
                                 setCart(updatedCart);
                                 saveToLocal(updatedCart);
+                                e.stopPropagation();
                               }}
-                              className="col-span-3"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                              className=" w-full h-[30px] text-[12px] rounded-[8px] "
                             />
                           </TableCell>
-                          <TableCell>{item.quantity * item.price}</TableCell>
-                          <TableCell>
+                          <TableCell className={"w-[100px] text-[12px]"}>
+                            {Intl.NumberFormat().format(
+                              item.quantity * item.price
+                            )}
+                          </TableCell>
+                          <TableCell className={"w-[10px] text-[12px] "}>
                             <Button
+                              className="p-0"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const updatedCart = [...cart];
@@ -192,24 +195,30 @@ function OnCart() {
                 </TableBody>
               </Table>
             </MenubarItem>
-            <MenubarSeparator />
+            <MenubarSeparator className="underline underline-offset-6 w-full my-[20px] bg-[#0000004a]" />
             <MenubarItem>
               <Table>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>Total</TableCell>
-                    <TableCell>{totalQuantity}</TableCell>
-                    <TableCell>{totalAmount}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Discount</TableCell>
-                    <TableCell>{discount * 10} %</TableCell>
-                    <TableCell>{totalAmount * discount}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Net price</TableCell>
+                  <TableRow className="text-[12px] font-semibold">
                     <TableCell></TableCell>
-                    <TableCell>{totalAmount * (1 - discount)}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="w-[250px] pl-[150px]">Total</TableCell>
+                    <TableCell>{totalQuantity}</TableCell>
+                    <TableCell>{Intl.NumberFormat().format(totalAmount)}</TableCell>
+                  </TableRow>
+                  <TableRow className="text-[12px] font-semibold">
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="w-[250px] pl-[150px]">Discount</TableCell>
+                    <TableCell>{discount * 100} %</TableCell>
+                    <TableCell>{Intl.NumberFormat().format(totalAmount * discount)}</TableCell>
+                  </TableRow>
+                  <TableRow className="text-[12px] font-semibold">
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="w-[250px] pl-[150px]">Net price</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>{Intl.NumberFormat().format(totalAmount * (1 - discount))}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -219,6 +228,7 @@ function OnCart() {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button
+                    className="bg-[#EA3E4E] text-white rounded-full ml-[75%] mb-[15px] w-[100px] hover:bg-[#ea3e4fd2]"
                     onClick={(e) => {
                       e.stopPropagation();
                       setCountdown(60);
@@ -228,16 +238,17 @@ function OnCart() {
                     Order
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] h-[800px]">
                   <DialogHeader>
                     <DialogTitle>Payment</DialogTitle>
                     {countdown != 0 ? (
                       <DialogDescription>
-                        Please scan the QR code within {countdown}
+                        Please scan the QR code within {countdown} sec
                         <img src={QRcode} alt="QRcode" />
                       </DialogDescription>
                     ) : (
-                      <DialogDescription>
+                        <DialogDescription className="flex flex-col items-center pt-[20px]">
+                          <img className="h-[360px]" src={CancelPayment} alt="cancel payment icon" />
                         Time Out !! Please try again next time
                       </DialogDescription>
                     )}
@@ -273,9 +284,10 @@ function OnCart() {
                   <DialogFooter>
                     <Button
                       disabled={countdown === 0}
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full w-[80px]"
                       onClick={() => {
-                          localStorage.removeItem("cart");
-                          setCart([])
+                        localStorage.removeItem("cart");
+                        setCart([]);
 
                         toast({
                           description: "Your payment was successful",
