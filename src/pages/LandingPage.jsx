@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 
 import {
@@ -20,7 +20,7 @@ import {
 } from "@/lib/utils/ui/dialog";
 import { Input } from "@/lib/utils/ui/input";
 import { Label } from "@/lib/utils/ui/label";
-import { da } from "date-fns/locale";
+
 
 function LandingPage() {
   const [movies, setMovies] = useState([]);
@@ -28,6 +28,7 @@ function LandingPage() {
   const [error, setError] = useState(null);
   const [price, setPrice] = useState();
   const [cart, setCart] = useState([]);
+  const [query, setQuery] = useState("");
 
   function formatDate(inputDate) {
     const parsedDate = parseISO(inputDate);
@@ -36,7 +37,7 @@ function LandingPage() {
   }
   function addCart(data) {
     const existingMovie = cart.find((movie) => movie.id === data.id);
-  
+
     if (existingMovie) {
       const updatedCart = cart.map((movie) =>
         movie.id === data.id ? { ...movie, amount: movie.amount + 1 } : movie
@@ -46,11 +47,11 @@ function LandingPage() {
       setCart([...cart, data]);
     }
   }
-  
+
   const getData = async () => {
     try {
       const result = await axios.get(
-        `https://api.themoviedb.org/3/search/movie?query=a`,
+        `https://api.themoviedb.org/3/search/movie?query=a || ${query}`,
         {
           headers: {
             accept: "application/json",
@@ -71,7 +72,7 @@ function LandingPage() {
     getData();
     console.log(movies);
     console.log({ cart: cart });
-  }, [cart]);
+  }, [cart, query]);
 
   return (
     <div className="w-full bg-with ">
@@ -83,7 +84,17 @@ function LandingPage() {
         <p>Error occurred: {error.message}</p>
       ) : (
         <div className="">
-          <div></div>
+          <div className="search-box">
+            <form>
+              <input
+                id="input-text-filter"
+                type="text"
+                placeholder="searching"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </form>
+          </div>
           <div className="flex flex-wrap">
             {movies.map((movie) => (
               <div
@@ -118,16 +129,24 @@ function LandingPage() {
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline">Add to Cart</Button>
+                        <Button
+                          disabled={
+                            cart.find(
+                              (movieOnCart) =>
+                                movieOnCart && movieOnCart.id === movie.id
+                            ) !== undefined
+                          }
+                          variant="outline"
+                        >
+                          Add to Cart
+                        </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                           <DialogTitle>Add Price</DialogTitle>
                         </DialogHeader>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="name" className="text-right">
-                            Name
-                          </Label>
+                          
                           <Input
                             id="name"
                             value={price}
@@ -137,7 +156,7 @@ function LandingPage() {
                           <DialogClose asChild>
                             <Button
                               onClick={() => {
-                                addCart({ ...movie, price: price, amount: 1});
+                                addCart({ ...movie, price: price, amount: 1 });
                               }}
                             >
                               Add
