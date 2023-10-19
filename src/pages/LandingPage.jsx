@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
+import NavBar from "../components/NavBar";
+import { useGlobalContext } from "../Contexts/GlobalContext";
+
 
 import {
   HoverCard,
@@ -19,16 +22,15 @@ import {
   DialogTrigger,
 } from "@/lib/utils/ui/dialog";
 import { Input } from "@/lib/utils/ui/input";
-import { Label } from "@/lib/utils/ui/label";
-
 
 function LandingPage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [price, setPrice] = useState();
-  const [cart, setCart] = useState([]);
+  const {cart, setCart} = useGlobalContext();
   const [query, setQuery] = useState("");
+
 
   function formatDate(inputDate) {
     const parsedDate = parseISO(inputDate);
@@ -37,16 +39,23 @@ function LandingPage() {
   }
   function addCart(data) {
     const existingMovie = cart.find((movie) => movie.id === data.id);
-
+  
     if (existingMovie) {
       const updatedCart = cart.map((movie) =>
         movie.id === data.id ? { ...movie, amount: movie.amount + 1 } : movie
       );
       setCart(updatedCart);
+  
+      const cartJSON = JSON.stringify(updatedCart); // Corrected line
+      localStorage.setItem("cart", cartJSON);
     } else {
       setCart([...cart, data]);
+  
+      const cartJSON = JSON.stringify([...cart, data]); // Store updated cart with the new movie
+      localStorage.setItem("cart", cartJSON);
     }
   }
+  
 
   const getData = async () => {
     try {
@@ -70,12 +79,17 @@ function LandingPage() {
 
   useEffect(() => {
     getData();
+    const cartJSON = localStorage.getItem("cart");
+        if (cartJSON) {
+          setCart(JSON.parse(cartJSON));
+        }
     console.log(movies);
     console.log({ cart: cart });
-  }, [cart, query]);
+  }, [query]);
 
   return (
-    <div className="w-full bg-with ">
+    <div className="w-full min-h-screen bg-gradient-to-t from-[#0d253f] to-white ">
+      <NavBar prop={cart} />
       {loading ? (
         <p className="h-20 text-Headline6 text-DarkGray font-Montserrat font-medium animate-pulse">
           Loading . . .
@@ -83,7 +97,7 @@ function LandingPage() {
       ) : error ? (
         <p>Error occurred: {error.message}</p>
       ) : (
-        <div className="">
+        <div className="flex flex-col items-center px-[200px] ">
           <div className="search-box">
             <form>
               <input
@@ -95,7 +109,7 @@ function LandingPage() {
               />
             </form>
           </div>
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap justify-center w-full">
             {movies.map((movie) => (
               <div
                 className="bg-red-300 w-[200px] h-[400px] m-[10px] px-[14px] py-[16px] flex flex-col items-center justify-between"
@@ -130,7 +144,7 @@ function LandingPage() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button
-                          disabled={
+                          disabled={cart&&
                             cart.find(
                               (movieOnCart) =>
                                 movieOnCart && movieOnCart.id === movie.id
@@ -146,7 +160,6 @@ function LandingPage() {
                           <DialogTitle>Add Price</DialogTitle>
                         </DialogHeader>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          
                           <Input
                             id="name"
                             value={price}
@@ -156,7 +169,11 @@ function LandingPage() {
                           <DialogClose asChild>
                             <Button
                               onClick={() => {
-                                addCart({ ...movie, price: price, amount: 1 });
+                                addCart({
+                                  ...movie,
+                                  price: price,
+                                  quantity: 1,
+                                });
                               }}
                             >
                               Add
