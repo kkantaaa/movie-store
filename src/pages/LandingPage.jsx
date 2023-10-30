@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import NavBar from "../components/NavBar";
 import { useGlobalContext } from "../Contexts/GlobalContext";
 
+
 import {
   HoverCard,
   HoverCardContent,
@@ -23,6 +24,7 @@ import {
 import { Input } from "@/lib/utils/ui/input";
 import { CircularProgress, CircularProgressLabel } from "@chakra-ui/react";
 
+
 function LandingPage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +38,7 @@ function LandingPage() {
     const formattedDate = format(parsedDate, "MMM dd, yyyy");
     return formattedDate;
   }
+
   function addCart(data) {
     const existingMovie = cart.find((movie) => movie.id === data.id);
 
@@ -57,13 +60,17 @@ function LandingPage() {
 
   const getData = async () => {
     try {
+      const { VITE_AUTH_TOKEN } = import.meta.env;
+console.log(VITE_AUTH_TOKEN); 
+
+
       const result = await axios.get(
         `https://api.themoviedb.org/3/search/movie?query=a || ${query}`,
         {
           headers: {
             accept: "application/json",
             Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNWFmZTA5ZDZjNDczYmYwMzg3MzAyYzgxYmJmYzIzMCIsInN1YiI6IjY1MmZmMGU5ZWE4NGM3MDBlYmEzZjliYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.QiADXSdSJq7kydJHFqacwpxCVukDfpWaa9hsSoaH3d4",
+            `Bearer ${VITE_AUTH_TOKEN}`,
           },
         }
       );
