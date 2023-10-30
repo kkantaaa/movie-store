@@ -61,7 +61,6 @@ function LandingPage() {
   const getData = async () => {
     try {
       const { VITE_AUTH_TOKEN } = import.meta.env;
-console.log(VITE_AUTH_TOKEN); 
 
 
       const result = await axios.get(
